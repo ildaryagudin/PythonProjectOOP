@@ -1,4 +1,35 @@
-from src.category_product import Product, Category
+class Product:
+    """
+        Создание класса продуктов
+    """
+    def __init__(self, name, description, price, quantity):
+        self.name = name               # Название товара
+        self.description = description # Описание товара
+        self.price = price             # Цена товара
+        self.quantity = quantity       # Количество товара
+
+
+class Category:
+    """
+        Создание класса категорий
+    """
+    category_count = 0  # Общий счётчик категорий
+    product_count = 0  # Суммарное количество товаров
+
+    def __init__(self, name, description, products=None):
+        if products is None:
+            products = []  # Использовать пустой список, если ничего не передано
+
+        self.name = name  # Название категории
+        self.description = description  # Описание категории
+        self.products = products  # Товары категории
+
+        # Инкрементируем счётчик категорий
+        Category.category_count += 1
+        Category.product_count += len(self.products)
+
+
+
 
 if __name__ == "__main__":
     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)

@@ -1,6 +1,6 @@
 import pytest
 
-from src.main import Product, Category  # Импортируйте ваши классы отсюда
+from src.category_product import Product, Category  # Импортируйте ваши классы отсюда
 
 @pytest.fixture(autouse=True)
 def reset_counts():

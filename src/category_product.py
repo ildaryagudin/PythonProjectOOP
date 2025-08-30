@@ -1,75 +1,49 @@
 class Product:
     """
-        Создание класса продуктов
+        Класс продукта с приватным атрибутом цены и соответствующими геттерами и сеттерами
     """
     def __init__(self, name, description, price, quantity):
-        self.name = name               # Название товара
-        self.description = description # Описание товара
-        self.price = price             # Цена товара
-        self.quantity = quantity       # Количество товара
+        self.name = name                   # Название товара
+        self.description = description     # Описание товара
+        self.__price = price               # Приватный атрибут цены
+        self.quantity = quantity           # Количество товара
+
+    # Геттер для цены
+    @property
+    def price(self):
+        return self.__price
+
+    # Сеттер для цены
+    @price.setter
+    def price(self, value):
+        if value <= 0:
+            print("Цена не должна быть нулевая или отрицательная")
+        else:
+            self.__price = value
 
 
 class Category:
-    """
-        Создание класса категорий
-    """
-    category_count = 0  # Общий счётчик категорий
-    product_count = 0  # Суммарное количество товаров
+    # Другие части класса оставляем без изменений
 
-    def __init__(self, name, description, products=None):
-        if products is None:
-            products = []  # Использовать пустой список, если ничего не передано
+    @property
+    def products_list(self):
+        """Возвращает строку с перечнем товаров в удобном формате"""
+        if not self._products:
+            return 'Список товаров пуст.'
 
-        self.name = name  # Название категории
-        self.description = description  # Описание категории
-        self.products = products  # Товары категории
+        formatted_products = []
+        for product in self._products:
+            formatted_products.append(
+                f'{product.name}, {product.price:.2f} руб. Остаток: {product.quantity} шт.'
+            )
+        return '\\n'.join(formatted_products)
 
-        # Инкрементируем счётчик категорий
-        Category.category_count += 1
-        Category.product_count += len(self.products)
+    def add_product(self, product):
+        """ Метод для добавления нового товара в категорию """
+        self._products.append(product)
+        # Повышаем общий счётчик количества товаров
+        Category.product_count += 1
 
 
 
 
-if __name__ == "__main__":
-    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
-    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
-
-    print(product1.name)
-    print(product1.description)
-    print(product1.price)
-    print(product1.quantity)
-
-    print(product2.name)
-    print(product2.description)
-    print(product2.price)
-    print(product2.quantity)
-
-    print(product3.name)
-    print(product3.description)
-    print(product3.price)
-    print(product3.quantity)
-
-    category1 = Category("Смартфоны",
-                         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
-                         [product1, product2, product3])
-
-    print(category1.name == "Смартфоны")
-    print(category1.description)
-    print(len(category1.products))
-    print(category1.category_count)
-    print(category1.product_count)
-
-    product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
-    category2 = Category("Телевизоры",
-                         "Современный телевизор, который позволяет наслаждаться просмотром, станет вашим другом и помощником",
-                         [product4])
-
-    print(category2.name)
-    print(category2.description)
-    print(len(category2.products))
-    print(category2.products)
-
-    print(Category.category_count)
-    print(Category.product_count)

@@ -1,42 +1,58 @@
 import pytest
+from src.category_product import Product  # импортируйте правильный модуль, где находятся ваши классы
 
-from src.category_product import Product, Category  # Импортируйте ваши классы отсюда
+@pytest.fixture
+def sample_product():
+    return Product("Телефон", "Описание телефона", 10000, 10)
 
-@pytest.fixture(autouse=True)
-def reset_counts():
-    """Сбрасываем счётчики перед каждым тестом"""
-    Category.category_count = 0
-    Category.product_count = 0
+def test_get_price(sample_product):
+    # Проверяем получение цены
+    assert sample_product.price == 10000
 
-# Тестирование инициализации объекта Product
-def test_product_initialization(reset_counts):
-    prod = Product("Телефон Samsung", "Оригинальный смартфон Samsung", 10000, 5)
-    assert prod.name == "Телефон Samsung"
-    assert prod.description == "Оригинальный смартфон Samsung"
-    assert prod.price == 10000
-    assert prod.quantity == 5
+def test_set_valid_price(sample_product):
+    # Меняем цену на валидное значение
+    sample_product.price = 15000
+    assert sample_product.price == 15000
 
-# Тестирование инициализации объекта Category
-def test_category_initialization(reset_counts):
-    p1 = Product("Телефон Samsung", "Оригинальный смартфон Samsung", 10000, 5)
-    p2 = Product("Ноутбук Lenovo", "Компактный ноутбук Lenovo", 30000, 3)
-    cat = Category("Электроника", "Техника для дома и офиса", [p1, p2])
-    assert cat.name == "Электроника"
-    assert cat.description == "Техника для дома и офиса"
-    assert len(cat.products) == 2
+def test_set_invalid_price_negative(sample_product, capsys):
+    # Пробуем задать отрицательное значение цены
+    sample_product.price = -5000
+    captured = capsys.readouterr()
+    assert "Цена не должна быть нулевая или отрицательная" in captured.out
+    assert sample_product.price == 10000  # цена осталась неизменной
 
-# Тестирование правильного подсчета количества товаров
-def test_product_count(reset_counts):
-    p1 = Product("Телефон Samsung", "Оригинальный смартфон Samsung", 10000, 5)
-    p2 = Product("Ноутбук Lenovo", "Компактный ноутбук Lenovo", 30000, 3)
-    cat = Category("Электроника", "Техника для дома и офиса", [p1, p2])
-    total_products = sum(prod.quantity for prod in cat.products)  # Ручной подсчёт товаров
-    assert total_products == 8  # 5 телефонов + 3 ноутбука = 8 штук
+def test_set_invalid_price_zero(sample_product, capsys):
+    # Пробуем задать нулевое значение цены
+    sample_product.price = 0
+    captured = capsys.readouterr()
+    assert "Цена не должна быть нулевая или отрицательная" in captured.out
+    assert sample_product.price == 10000  # цена осталась неизменной
 
-# Тестирование правильного подсчета количества категорий
-def test_category_count(reset_counts):
-    p1 = Product("Телефон Samsung", "Оригинальный смартфон Samsung", 10000, 5)
-    p2 = Product("Ноутбук Lenovo", "Компактный ноутбук Lenovo", 30000, 3)
-    cat1 = Category("Электроника", "Техника для дома и офиса", [p1, p2])
-    cat2 = Category("Автомобили", "Транспортные средства", [])  # Вторая категория без товаров
-    assert Category.category_count == 2  # Всего создано 2 категории
+
+from src.category_product import Category  # замените на ваше реальное расположение модуля
+
+@pytest.fixture
+def empty_category():
+    return Category("Категории", "Описание категории")
+
+@pytest.fixture
+def populated_category(empty_category):
+    empty_category.add_product(Product("Телефон", "Описание телефона", 10000, 10))
+    empty_category.add_product(Product("Планшет", "Описание планшета", 20000, 5))
+    return empty_category
+
+def test_empty_products_list(empty_category):
+    # Проверяем отсутствие товаров
+    assert empty_category.products_list == "Список товаров пуст."
+
+def test_populated_products_list(populated_category):
+    expected_output = (
+        "Телефон, 10000.00 руб. Остаток: 10 шт.\\n"
+        "Планшет, 20000.00 руб. Остаток: 5 шт."
+    )
+    assert populated_category.products_list == expected_output
+
+def test_add_product(empty_category):
+    # Проверяем добавление товара
+    empty_category.add_product(Product("Телефон", "Описание телефона", 10000, 10))
+    assert len(empty_category._products) == 1

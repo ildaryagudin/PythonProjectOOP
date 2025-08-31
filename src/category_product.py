@@ -23,11 +23,30 @@ class Product:
 
 
 class Category:
-    # Другие части класса оставляем без изменений
+    # Общий счетчик количества товаров среди всех категорий
+    product_count = 0
+
+    def __init__(self, name):
+        self.name = name  # Имя категории
+        self._products = []  # Список товаров в данной категории
+
+    def add_product(self, product):
+        """
+        Метод для добавления нового товара в категорию с проверкой типа объекта.
+
+        Проверяется, что добавляемый продукт является экземпляром класса Product или его наследника.
+        Если условие выполнено, товар добавляется в список товаров категории.
+        """
+        if isinstance(product, Product):
+            self._products.append(product)
+            # Повышаем общий счётчик количества товаров
+            Category.product_count += 1
+        else:
+            raise ValueError(f"{product} не является экземпляром класса Product.")
 
     @property
     def products_list(self):
-        """Возвращает строку с перечнем товаров в удобном формате"""
+        """Возвращает строку с перечнем товаров в удобном формате."""
         if not self._products:
             return 'Список товаров пуст.'
 
@@ -37,12 +56,6 @@ class Category:
                 f'{product.name}, {product.price:.2f} руб. Остаток: {product.quantity} шт.'
             )
         return '\\n'.join(formatted_products)
-
-    def add_product(self, product):
-        """ Метод для добавления нового товара в категорию """
-        self._products.append(product)
-        # Повышаем общий счётчик количества товаров
-        Category.product_count += 1
 
 
 

@@ -56,3 +56,26 @@ def test_add_product(empty_category):
     # Проверяем добавление товара
     empty_category.add_product(Product("Телефон", "Описание телефона", 10000, 10))
     assert len(empty_category._products) == 1
+
+
+
+@pytest.fixture
+def create_product():
+    return Product(name="Test Product", description="Description", price=100, quantity=10)
+
+def test_add_two_products(create_product):
+    # Создаём два товара
+    p1 = create_product()
+    p2 = Product(name="Another Test Product", description="Another Description", price=200, quantity=2)
+
+    # Проверяем результат сложения
+    expected_total_cost = p1.price * p1.quantity + p2.price * p2.quantity
+    assert p1 + p2 == expected_total_cost, "Ошибка при сложении товаров"
+
+
+def test_invalid_type_in_addition(create_product):
+    p1 = create_product()
+    invalid_object = "Not a Product instance"
+
+    with pytest.raises(TypeError):
+        _ = p1 + invalid_object

@@ -44,7 +44,7 @@ class Category:
 
     def __init__(self, name):
         self.name = name                     # Имя категории
-        self._products = []                 # Список товаров в данной категории
+        self._products = []                  # Список товаров в данной категории
 
     def add_product(self, product):
         """
@@ -64,8 +64,9 @@ class Category:
     def products_list(self):
         if not self._products:
             return 'Список товаров пуст.'
-        return '\n'.join(str(product) for product in self._products)
+        return '\\n'.join(str(product) for product in self._products)
 
     # Строковое представление категории
     def __str__(self):
-        return f"{self.name}, количество продуктов: {len(self._products)} шт."
+        total_quantity = sum(product.quantity for product in self._products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."

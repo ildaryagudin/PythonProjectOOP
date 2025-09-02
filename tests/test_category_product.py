@@ -1,81 +1,97 @@
 import pytest
-from src.category_product import Product  # импортируйте правильный модуль, где находятся ваши классы
 
-@pytest.fixture
-def sample_product():
-    return Product("Телефон", "Описание телефона", 10000, 10)
+from src.category_product import Product, Smartphone, LawnGrass, Category
 
-def test_get_price(sample_product):
-    # Проверяем получение цены
-    assert sample_product.price == 10000
+# Тест №1: Проверка правильного создания товара и доступности полей
+def test_create_product():
+    product = Product(name='Тестовый товар', description='Описание товара', price=100, quantity=5)
+    assert product.name == 'Тестовый товар'
+    assert product.price == 100
+    assert product.quantity == 5
 
-def test_set_valid_price(sample_product):
-    # Меняем цену на валидное значение
-    sample_product.price = 15000
-    assert sample_product.price == 15000
+# Тест №2: Проверка изменения цены товара
+def test_change_price():
+    product = Product(name='Телефон', description='Смартфон', price=50000, quantity=10)
+    product.price = 60000
+    assert product.price == 60000
 
-def test_set_invalid_price_negative(sample_product, capsys):
-    # Пробуем задать отрицательное значение цены
-    sample_product.price = -5000
-    captured = capsys.readouterr()
-    assert "Цена не должна быть нулевая или отрицательная" in captured.out
-    assert sample_product.price == 10000  # цена осталась неизменной
+# Тест №3: Проверка ошибки при изменении цены на отрицательное значение
+def test_negative_price(capfd):
+    product = Product(name='Книга', description='Научная литература', price=1500, quantity=20)
+    product.price = -100
+    captured = capfd.readouterr()
+    assert captured.out.strip() == "Цена не должна быть нулевой или отрицательной"
 
-def test_set_invalid_price_zero(sample_product, capsys):
-    # Пробуем задать нулевое значение цены
-    sample_product.price = 0
-    captured = capsys.readouterr()
-    assert "Цена не должна быть нулевая или отрицательная" in captured.out
-    assert sample_product.price == 10000  # цена осталась неизменной
-
-
-from src.category_product import Category  # замените на ваше реальное расположение модуля
-
-@pytest.fixture
-def empty_category():
-    return Category("Категории", "Описание категории")
-
-@pytest.fixture
-def populated_category(empty_category):
-    empty_category.add_product(Product("Телефон", "Описание телефона", 10000, 10))
-    empty_category.add_product(Product("Планшет", "Описание планшета", 20000, 5))
-    return empty_category
-
-def test_empty_products_list(empty_category):
-    # Проверяем отсутствие товаров
-    assert empty_category.products_list == "Список товаров пуст."
-
-def test_populated_products_list(populated_category):
-    expected_output = (
-        "Телефон, 10000.00 руб. Остаток: 10 шт.\\n"
-        "Планшет, 20000.00 руб. Остаток: 5 шт."
+# Тест №4: Проверка правильной работы сложения двух товаров одного типа
+def test_add_products_of_same_type():
+    smartphone1 = Smartphone(
+        name="iPhone 14",
+        description="Apple смартфон",
+        price=99990,
+        quantity=10,
+        efficiency="Высокая производительность",
+        model="Pro Max",
+        memory=512,
+        color="Черный"
     )
-    assert populated_category.products_list == expected_output
+    smartphone2 = Smartphone(
+        name="Samsung Galaxy S23",
+        description="Samsung смартфон",
+        price=89990,
+        quantity=15,
+        efficiency="Хорошая производительность",
+        model="S23 Ultra",
+        memory=256,
+        color="Белый"
+    )
+    total_sum = smartphone1 + smartphone2
+    expected_result = 99990 * 10 + 89990 * 15
+    assert total_sum == expected_result
 
-def test_add_product(empty_category):
-    # Проверяем добавление товара
-    empty_category.add_product(Product("Телефон", "Описание телефона", 10000, 10))
-    assert len(empty_category._products) == 1
-
-
-
-@pytest.fixture
-def create_product():
-    return Product(name="Test Product", description="Description", price=100, quantity=10)
-
-def test_add_two_products(create_product):
-    # Создаём два товара
-    p1 = create_product()
-    p2 = Product(name="Another Test Product", description="Another Description", price=200, quantity=2)
-
-    # Проверяем результат сложения
-    expected_total_cost = p1.price * p1.quantity + p2.price * p2.quantity
-    assert p1 + p2 == expected_total_cost, "Ошибка при сложении товаров"
-
-
-def test_invalid_type_in_addition(create_product):
-    p1 = create_product()
-    invalid_object = "Not a Product instance"
-
+# Тест №5: Проверка исключения при сложении товаров разного типа
+def test_add_different_types():
+    smartphone = Smartphone(
+        name="iPhone 14",
+        description="Apple смартфон",
+        price=99990,
+        quantity=10,
+        efficiency="Высокая производительность",
+        model="Pro Max",
+        memory=512,
+        color="Черный"
+    )
+    grass = LawnGrass(
+        name="Turf Grass",
+        description="Газонная трава",
+        price=1200,
+        quantity=50,
+        country="Германия",
+        germination_period="7-10 дней",
+        color="Зеленый"
+    )
     with pytest.raises(TypeError):
-        _ = p1 + invalid_object
+        smartphone + grass
+
+# Тест №6: Проверка добавления товаров в категорию
+def test_add_to_category():
+    category = Category("Смартфоны")
+    phone = Smartphone(
+        name="iPhone 14",
+        description="Apple смартфон",
+        price=99990,
+        quantity=10,
+        efficiency="Высокая производительность",
+        model="Pro Max",
+        memory=512,
+        color="Черный"
+    )
+    category.add_product(phone)
+    assert len(category._products) == 1
+    assert category._products[0].name == "iPhone 14"
+
+# Тест №7: Проверка невозможности добавления постороннего объекта в категорию
+def test_add_invalid_object_to_category():
+    category = Category("Смартфоны")
+    invalid_obj = "Некорректный объект"
+    with pytest.raises(ValueError):
+        category.add_product(invalid_obj)

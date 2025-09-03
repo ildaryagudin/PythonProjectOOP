@@ -1,3 +1,13 @@
+class MixinLogCreation:
+    """Mixin-класс для логирования создания объекта."""
+
+    def __init__(self, *args, **kwargs):
+        """Конструктор миксина выводит информацию о классе и передаваемых аргументах"""
+        print(f"Создается объект класса '{type(self).__name__}' с аргументами:")
+        print(f"Позиционные аргументы: {args}")
+        print(f"Ключевые аргументы: {kwargs}")
+        super().__init__(*args, **kwargs)
+
 class Product:
     """
     Класс продукта с приватным атрибутом цены и соответствующими геттерами и сеттерами
@@ -91,24 +101,63 @@ class Category:
 
 
 # Классы-наследники
-class Smartphone(Product):
-    def __init__(self, name, description, price, quantity, efficiency, model, memory, color):
+import abc
+from abc import ABCMeta, abstractmethod
+
+class BaseProduct(metaclass=ABCMeta):
+    """Абстрактный класс продукта"""
+    def __init__(self, name, description, price, quantity):
+        self.name = name
+        self.description = description
+        self.price = price
+        self.quantity = quantity
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+class Product(MixinLogCreation, BaseProduct):
+    """Класс конкретного продукта, наследуется от абстрактного класса и миксина"""
+    def __init__(self, name, description, price, quantity):
         super().__init__(name, description, price, quantity)
-        self.efficiency = efficiency
-        self.model = model
-        self.memory = memory
-        self.color = color
 
     def __str__(self):
-        return f"{super().__str__()} ({self.model}, память: {self.memory} ГБ)"
+        return f"Товар '{self.name}', {self.description}, цена: {self.price}, количество: {self.quantity}"
 
 
-class LawnGrass(Product):
+class Smartphone(BaseProduct):
+    """Класс Смартфона, расширяющий базовые характеристики продукта"""
+
+    def __init__(self, name, description, price, quantity, brand, screen_size):
+        """
+        Конструктор смартфона включает общие данные продукта + специфичные для смартфонов характеристики
+
+        :param brand: Бренд смартфона
+        :param screen_size: Размер экрана смартфона
+        """
+        super().__init__(name, description, price, quantity)
+        self.brand = brand
+        self.screen_size = screen_size
+
+    def __str__(self):
+        return f"Смартфон '{self.name}' ({self.brand}, экран {self.screen_size} дюймов)"
+
+
+class LawnGrass(BaseProduct):
+    """Класс Газонной травы, расширяющий базовые характеристики продукта"""
+
     def __init__(self, name, description, price, quantity, country, germination_period, color):
+        """
+        Конструктор травы включает общие данные продукта + специфичные для травы характеристики
+
+        :param country: Страна-производитель
+        :param germination_period: Период всхожести семян
+        :param color: Цвет травы
+        """
         super().__init__(name, description, price, quantity)
         self.country = country
         self.germination_period = germination_period
         self.color = color
 
     def __str__(self):
-        return f"{super().__str__()} (Страна производства: {self.country})"
+        return f"Трава газонная '{self.name}' ({self.country}, период всхожести {self.germination_period} дней, цвет {self.color})"

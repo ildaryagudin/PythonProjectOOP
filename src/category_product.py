@@ -20,9 +20,9 @@ class Product:
         return f"{self.name}, {self.price:.2f} руб., остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        # Проверяем, что другие объект принадлежит тому же самому типу
-        if type(self) != type(other):
-            raise TypeError("Объекты принадлежат разным классам и не могут быть сложены вместе.")
+        # Используем isinstance() для проверки совместимости объектов
+        if not isinstance(other, Product):
+            raise TypeError("Объект другого типа нельзя складывать с объектом Product.")
 
         # Вычисляем суммарную стоимость текущих товаров
         cost_self = self.price * self.quantity

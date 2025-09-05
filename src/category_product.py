@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-
 class MixinLogCreation:
     """Mixin-класс для логирования создания объекта."""
 
@@ -61,11 +60,28 @@ class Category:
         """
         # Проверяем, что добавляемый объект относится к классу Product или его потомкам
         if isinstance(product, Product):
+            # Задание 1: Проверка на нулевое количество
+            if product.quantity == 0:
+                raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
             self._products.append(product)
             # Повышаем общий счётчик количества товаров
             Category.product_count += 1
         else:
             raise ValueError(f"{product} не является экземпляром класса Product или его наследником.")
+
+    def average_price(self):
+        """
+        Метод для подсчета среднего ценника всех товаров в категории.
+        Обрабатывает случай, когда в категории нет товаров.
+        """
+        try:
+            total_price = sum(product.price for product in self._products)
+            average = total_price / len(self._products)
+            return average
+        except ZeroDivisionError:
+            # Если в категории нет товаров, возвращаем 0
+            return 0
 
     # Свойство для вывода списка товаров
     @property
@@ -84,6 +100,10 @@ class Product(MixinLogCreation, AbstractProduct):
     """
 
     def __init__(self, name, description, price, quantity):
+        # Задание 1: Проверка на нулевое количество при создании товара
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         super().__init__(name=name, description=description, price=price, quantity=quantity)
         self.name = name  # Название товара
         self.description = description  # Описание товара
@@ -155,3 +175,33 @@ class LawnGrass(Product):
 
     def __str__(self):
         return f"Трава газонная '{self.name}' ({self.country}, период всхожести {self.germination_period} дней, цвет {self.color}), {self.price:.2f} руб. Остаток: {self.quantity} шт."
+
+
+# Демонстрация работы кода
+if __name__ == "__main__":
+    try:
+        # Создаем категорию
+        electronics = Category("Электроника", "Техника и гаджеты")
+
+        # Пытаемся создать товар с нулевым количеством - должно вызвать исключение
+        # product1 = Product("Телефон", "Смартфон", 10000, 0)
+
+        # Создаем нормальные товары
+        product2 = Product("Ноутбук", "Игровой ноутбук", 50000, 5)
+        product3 = Product("Наушники", "Беспроводные наушники", 3000, 10)
+
+        # Добавляем товары в категорию
+        electronics.add_product(product2)
+        electronics.add_product(product3)
+
+        # Тестируем метод average_price
+        print(f"Средняя цена товаров в категории: {electronics.average_price():.2f} руб.")
+
+        # Создаем пустую категорию для тестирования обработки деления на ноль
+        empty_category = Category("Пустая", "Категория без товаров")
+        print(f"Средняя цена в пустой категории: {empty_category.average_price():.2f} руб.")
+
+    except ValueError as e:
+        print(f"Ошибка: {e}")
+    except Exception as e:
+        print(f"Неожиданная ошибка: {e}")

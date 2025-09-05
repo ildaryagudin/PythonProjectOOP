@@ -1,3 +1,6 @@
+from abc import ABC, abstractmethod
+
+
 class MixinLogCreation:
     """Mixin-класс для логирования создания объекта."""
 
@@ -17,6 +20,25 @@ class MixinLogCreation:
         except TypeError:
             # Если следующий класс не принимает аргументы (например, object)
             super().__init__()
+
+
+class AbstractProduct(ABC):
+    """Абстрактный базовый класс для продуктов"""
+
+    @abstractmethod
+    def __init__(self, name, description, price, quantity):
+        self.name = name
+        self.description = description
+        self.price = price
+        self.quantity = quantity
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+    @abstractmethod
+    def __add__(self, other):
+        pass
 
 
 class Category:
@@ -56,7 +78,7 @@ class Category:
         return f"{self.name}, количество продуктов: {total_quantity} шт."
 
 
-class Product(MixinLogCreation):
+class Product(MixinLogCreation, AbstractProduct):
     """
     Класс продукта с приватным атрибутом цены и соответствующими геттерами и сеттерами
     """
